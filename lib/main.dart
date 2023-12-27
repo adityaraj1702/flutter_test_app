@@ -1,116 +1,127 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test_app/decorations/textfield_decoration.dart';
-import 'package:flutter_test_app/splash_screen.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_test_app/on_boarding.dart';
 
 void main() {
-  runApp(MaterialApp(
-    theme: ThemeData(
-      // Define the default brightness and colors.
-      brightness: Brightness.light,
-      primaryColor: Colors.blue,
-
-      // Define the default font family.
-      fontFamily: 'Arial',
-
-      // Define the default TextTheme. Use this to specify the default
-      // text styling for headlines, titles, bodies of text, and more.
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(fontSize: 96.0, fontWeight: FontWeight.bold),
-        titleLarge: TextStyle(fontSize: 20.0, fontStyle: FontStyle.normal),
-        bodyMedium: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
-      ),
-
-      // Define the default button theme.
-      buttonTheme: ButtonThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-        buttonColor: Colors.red,
-      ),
-    ),
-    home: const SplashScreen(),
-  ));
+  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Flutter App",
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomePage(),
+    );
+  }
 }
 
-class MyAppState extends State<MyApp> {
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
-  var heightController = TextEditingController();
-  var weightController = TextEditingController();
-  var msg = "";
-  var result = "";
-  var bgColor = const Color.fromARGB(255, 103, 187, 255);
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<OnBoardingEntity> _onBoardingData = OnBoardingEntity.onBoardingData;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('BMI Calculator'),
-      ),
-      body: Container(
-        color: bgColor,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: heightController,
-                keyboardType: TextInputType.number,
-                decoration: inputTextDecoration(hint: "Enter Height in cm").copyWith(
-                  prefixIcon: Icon(Icons.height),
-                ),
+        body: PageView.builder(
+      physics: const BouncingScrollPhysics(
+          decelerationRate: ScrollDecelerationRate.fast),
+      itemCount: _onBoardingData.length,
+      itemBuilder: (context, index) {
+        return OnBoardingItem(
+            title: _onBoardingData[index].title,
+            discription: _onBoardingData[index].discription,
+            image: _onBoardingData[index].image,
+            index: index);
+      },
+    ));
+  }
+}
+
+class OnBoardingItem extends StatelessWidget {
+  final String title;
+  final String discription;
+  final String image;
+  final int index;
+
+  const OnBoardingItem(
+      {super.key,
+      required this.title,
+      required this.discription,
+      required this.image,
+      required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+            width: 300,
+            height: 200,
+            child: Center(
+              child: Image.asset("assets/images/$image"),
+            )),
+        const SizedBox(
+          height: 20,
+        ),
+        Text(title,
+            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+        const SizedBox(
+          height: 20,
+        ),
+        Text(
+          discription,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+        const SizedBox(
+          height: 50,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: index == 0 ? Colors.black : Colors.grey,
+                )),
+            const SizedBox(
+              width: 10,
+            ),
+            Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: index == 1 ? Colors.black : Colors.grey,
+                )),
+            const SizedBox(
+              width: 10,
+            ),
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: index == 2 ? Colors.black : Colors.grey,
               ),
-              SizedBox(height: 11,),
-              TextField(
-                controller: weightController,
-                keyboardType: TextInputType.number,
-                decoration: inputTextDecoration(hint: "Enter Weight in cm").copyWith(
-                  prefixIcon: Icon(Icons.circle),
-                ),
-              ),
-              SizedBox(height: 11,),
-              ElevatedButton(
-                onPressed: (){
-                  String height = heightController.text;
-                  String weight = weightController.text;
-                  if(height.isEmpty || weight.isEmpty){
-                    msg = "Please enter all the fields";
-                  }else{
-                    double heightInCm = double.parse(height);
-                    double weightInKg = double.parse(weight);
-                    double bmi = weightInKg/(heightInCm/100*heightInCm/100);
-                    if(bmi <18.5){
-                      bgColor = Colors.yellow;
-                      msg = "You are Underweight!";
-                    }
-                    else if(bmi<25){
-                      bgColor = Colors.green;
-                      msg = "You are in Normal Weight Range!";
-                    }
-                    else{
-                      bgColor = Colors.red;
-                      msg = "You are OverWeight!";
-                    }
-                    result = "Your BMI is ${bmi.toStringAsFixed(2)}";
-                  }
-                  setState(() {
-                    
-                  });
-                },
-                child: Text("Calculate"),
-              ),
-              Text(msg),
-              Text(result),
-              
-            ],
-          )
-        )
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
